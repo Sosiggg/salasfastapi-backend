@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import models, schemas, crud
 from database import SessionLocal, engine
+from fastapi.middleware.cors import CORSMiddleware
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -18,6 +19,7 @@ def get_db():
 def read_root():
     return {
         "message": "Welcome to the Salas' To-Do List API!",
+        "documentation": "You can access the API documentation at /docs.",
         "endpoints": {
             "List tasks": "/tasks/",
             "Create task": "/tasks/",
@@ -48,3 +50,16 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "Task successfully deleted."}
+
+origins = [
+    "http://localhost:3000",  
+    "https://salastodolistfastapi.netlify.app/",  
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"], 
+)
